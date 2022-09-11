@@ -115,7 +115,7 @@ if __name__ == "__main__":
     logger.add("output/wiki_generator_log.txt",
                encoding="utf-8",
                level="INFO",
-               retention="10s")
+               retention="10 seconds")
 
     mod_text_path = r"E:\SteamLibrary\steamapps\workshop\content\270150\2606099273\media\packages\GFL_Castling\languages\cn\misc_text.xml"
 

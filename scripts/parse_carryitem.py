@@ -110,7 +110,7 @@ def parse_ci_file(ci_file:str, out_folder: str):
                 ci_attrs["层数"] = nodenum-1
                 read_ci(v, out_folder)
             else:
-                raise ValueError("Found two fullkey")
+                raise ValueError("Found two headkey")
         else:
             failed += 1
     if failed == nodenum:
@@ -144,63 +144,50 @@ def parse_faction_ci(faction_ci_file:str,
     # 以防以后各个阵营的护甲有不同之处，每个阵营用一个if语句来分离
     if faction == 'G&K':
         faction_folder = output + '/G&K护甲'
+        if REMOVE_OLD and os.path.exists(faction_folder):
+            shutil.rmtree(faction_folder)
 
         for item in fac_ci_xml.iter(tag="carry_item"):
             ci_file = item.attrib["file"]
-            # if "immunity" in ci_file:
-            #     continue
             ci_folder = faction_folder + '/护甲'
-            if REMOVE_OLD and os.path.exists(ci_folder):
-                shutil.rmtree(ci_folder)
-                REMOVE_OLD = False
             os.makedirs(ci_folder, exist_ok=True)
             parse_ci_file(ci_file, ci_folder)
         logger.info(f"{faction}一共处理了{len(all_ci.keys())}个护甲")
         faction_all_ci[f"{faction}护甲"] = all_ci
-        # 要重新生成下一个阵营的文件夹
-        REMOVE_OLD = True
     elif faction == 'SF':
         faction_folder = output + '/SF护甲'
+        if REMOVE_OLD and os.path.exists(faction_folder):
+            shutil.rmtree(faction_folder)
         for item in fac_ci_xml.iter(tag="carry_item"):
             ci_file = item.attrib["file"]
             ci_folder = faction_folder + '/护甲'
-            if REMOVE_OLD and os.path.exists(ci_folder):
-                shutil.rmtree(ci_folder)
-                REMOVE_OLD = False
             os.makedirs(ci_folder, exist_ok=True)
             parse_ci_file(ci_file, ci_folder)
         logger.info(f"{faction}一共处理了{len(all_ci.keys())}个护甲")
         faction_all_ci[f"{faction}护甲"] = all_ci
-        # 要重新生成下一个阵营的文件夹
-        REMOVE_OLD = True
     elif faction == 'KCCO':
         faction_folder = output + '/KCCO护甲'
+        if REMOVE_OLD and os.path.exists(faction_folder):
+            shutil.rmtree(faction_folder)
         for item in fac_ci_xml.iter(tag="carry_item"):
             ci_file = item.attrib["file"]
             ci_folder = faction_folder + '/护甲'
-            if REMOVE_OLD and os.path.exists(ci_folder):
-                shutil.rmtree(ci_folder)
-                REMOVE_OLD = False
             os.makedirs(ci_folder, exist_ok=True)
             parse_ci_file(ci_file, ci_folder)
         logger.info(f"{faction}一共处理了{len(all_ci.keys())}个护甲")
         faction_all_ci[f"{faction}护甲"] = all_ci
-        # 要重新生成下一个阵营的文件夹
-        REMOVE_OLD = True
     elif faction == 'Paradeus':
         faction_folder = output + '/Paradeus护甲'
+        if REMOVE_OLD and os.path.exists(faction_folder):
+            shutil.rmtree(faction_folder)
         for item in fac_ci_xml.iter(tag="carry_item"):
             ci_file = item.attrib["file"]
             ci_folder = faction_folder + '/护甲'
-            if REMOVE_OLD and os.path.exists(ci_folder):
-                shutil.rmtree(ci_folder)
-                REMOVE_OLD = False
             os.makedirs(ci_folder, exist_ok=True)
             parse_ci_file(ci_file, ci_folder)
         logger.info(f"{faction}一共处理了{len(all_ci.keys())}个护甲")
         faction_all_ci[f"{faction}护甲"] = all_ci
         # 要重新生成下一个阵营的文件夹
-        REMOVE_OLD = True
 
 def parse_all_carryitem(mod_i_dir:str, all_carryitem_path:str, mod_text_path:str):
 

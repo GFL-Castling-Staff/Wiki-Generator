@@ -197,7 +197,8 @@ def read_weapon(weapon: et.Element, out_folder: str):
 
     # 过滤key值
     key = weapon.attrib['key']
-    if 'ai' in key:
+    if '_ai' in key or\
+        'AI' in key:
         return
 
     # 读取specification中的数据
@@ -311,6 +312,8 @@ def parse_faction_weapon(faction_weapon_file: str,
 
     if faction == 'G&K':
         faction_folder = output + '/G&K武器'
+        if REMOVE_OLD and os.path.exists(faction_folder):
+            shutil.rmtree(faction_folder)
         # 读取gk_weapons.xml里的条目
         for node in faction_weapon_xml.iter(tag="weapon"):
             weapon_file = node.attrib["file"]
@@ -319,36 +322,38 @@ def parse_faction_weapon(faction_weapon_file: str,
             # gkw_编号_类型_弹头_名字
             # gkw_编号_类型_弹头_名字_MOD3
             # 为什么是_only呢？我不明白
-            wea_pattern = "gkw_[0-9]{0,}_((ar)|(smg)|(hg)|(rf)|(sg)|(mg))_[0-9a-z.]{0,}_[0-9a-zA-Z]{0,}((_MOD3)|(_mod3)){0,1}(_skill){0,1}(_only){0,1}.weapon"
+            weap_pattern = "gkw_[0-9]+_((ar)|(smg)|(hg)|(rf)|(sg)|(mg))_[0-9a-zA-Z.-]+_[0-9a-zA-Z.]+(_[0-9a-zA-Z]+)?((_MOD3)|(_mod3))?(_skill)?(_only)?.weapon"
             # 前面两种_skill，以前的老命名文件了
             # 前面两种_皮肤编号_SKIN，以前的老命名文件了
-            skin_pattern = "gkw_[0-9]{0,}_((ar)|(smg)|(hg)|(rf)|(sg)|(mg))_[0-9a-z.]{0,}_[0-9a-zA-Z]{0,}((_MOD3)|(_mod3)){0,1}(_[0-9]{0,}_SKIN){0,1}(_skill){0,1}(_only){0,1}.weapon"
+            skin_pattern = "gkw_[0-9]+_((ar)|(smg)|(hg)|(rf)|(sg)|(mg))_[0-9a-zA-Z.-]+_[0-9a-zA-Z.]+(_[0-9a-zA-Z]+)?((_MOD3)|(_mod3))?(_[0-9a-zA-Z]+_SKIN)?(_skill)?(_only)?.weapon"
             # 一些不同命名格式的文件
             diff_pattern = "((gkw_special_cyclops)|(target)|(gkw_medical_agl_hg)).weapon"
             # HVY武器
-            hvy_pattern = "gkw_((hvy)|(228_smg_8x22_type100_banzai)|(hvypdw))_"
+            hvy_pattern = "gkw_((hvy)|(228_smg_8x22_type100_banzai)|(hvypdw))[a-z0-9_]*.weapon"
 
             if re.match(xml_pattern, weapon_file) is not None:
+                REMOVE_OLD = False
                 parse_faction_weapon(weapon_file, output, True)
-            elif re.match(wea_pattern, weapon_file) is not None:
-                s = weapon_file.split('_')
-                weapon_id = int(s[1])
-                if weapon_id == 404:
-                    continue
-                weapon_type = s[2].upper()
-                weapon_folder = faction_folder + f'/{weapon_type}'
-                if REMOVE_OLD and os.path.exists(weapon_folder):
-                    shutil.rmtree(weapon_folder)
-                    REMOVE_OLD = False
+                REMOVE_OLD = True
+            elif weapon_file.startswith("FF"):
+                weapon_folder = faction_folder + f'/融合势力类'
                 os.makedirs(weapon_folder, exist_ok=True)
 
-                weapon_attrs["武器编号"] = weapon_id
-                weapon_attrs["武器类型"] = weapon_type
+                weapon_attrs["武器编号"] = ""
+                weapon_attrs["武器类型"] = "FF"
+                parse_weapon_file(weapon_file, weapon_folder)
+            elif re.match(hvy_pattern, weapon_file) is not None:
+                weapon_folder = faction_folder + f'/HVY'
+                os.makedirs(weapon_folder, exist_ok=True)
+
+                weapon_attrs["武器编号"] = ""
+                weapon_attrs["武器类型"] = "HVY"
                 parse_weapon_file(weapon_file, weapon_folder)
             elif re.match(skin_pattern, weapon_file) is not None:
                 s = weapon_file.split('_')
                 weapon_id = int(s[1])
                 if weapon_id == 404:
+                    # logger.info(f"跳过{weapon_file}的处理")
                     continue
                 weapon_type = s[2].upper()
                 weapon_folder = faction_folder + f'/{weapon_type}皮肤'
@@ -357,29 +362,33 @@ def parse_faction_weapon(faction_weapon_file: str,
                 weapon_attrs["武器编号"] = weapon_id
                 weapon_attrs["武器类型"] = f'{weapon_type}皮肤'
                 parse_weapon_file(weapon_file, weapon_folder)
-            elif weapon_file.startswith("FF"):
-                weapon_folder = faction_folder + f'/融合势力类'
+            elif re.match(weap_pattern, weapon_file) is not None:
+                s = weapon_file.split('_')
+                weapon_id = int(s[1])
+                if weapon_id == 404:
+                    # logger.info(f"跳过{weapon_file}的处理")
+                    continue
+                weapon_type = s[2].upper()
+                weapon_folder = faction_folder + f'/{weapon_type}'
                 os.makedirs(weapon_folder, exist_ok=True)
 
-                weapon_attrs["武器编号"] = ""
-                weapon_attrs["武器类型"] = "FF"
+                weapon_attrs["武器编号"] = weapon_id
+                weapon_attrs["武器类型"] = weapon_type
                 parse_weapon_file(weapon_file, weapon_folder)
             else:
+                logger.info(f"跳过{weapon_file}的处理")
                 continue
         if not in_rec:
             logger.info(f"{faction}一共处理了{len(all_weapon.keys())}把武器")
             faction_all_weapon[f"{faction}武器"] = all_weapon
-            # 要重新生成下一个阵营的文件夹
-            REMOVE_OLD = True
     elif faction == 'SF':
         faction_folder = output + '/SF武器'
+        if REMOVE_OLD and os.path.exists(faction_folder):
+            shutil.rmtree(faction_folder)
         # 读取sf_weapons.xml里的条目
         for node in faction_weapon_xml.iter(tag="weapon"):
             weapon_file = node.attrib["file"]
             weapon_folder = faction_folder + f'/武器'
-            if REMOVE_OLD and os.path.exists(weapon_folder):
-                shutil.rmtree(weapon_folder)
-                REMOVE_OLD = False
             os.makedirs(weapon_folder, exist_ok=True)
 
             weapon_attrs["武器编号"] = ""
@@ -388,9 +397,10 @@ def parse_faction_weapon(faction_weapon_file: str,
         if not in_rec:
             logger.info(f"{faction}一共处理了{len(all_weapon.keys())}把武器")
             faction_all_weapon[f"{faction}武器"] = all_weapon
-            REMOVE_OLD = True
     elif faction == 'KCCO':
         faction_folder = output + '/KCCO武器'
+        if REMOVE_OLD and os.path.exists(faction_folder):
+            shutil.rmtree(faction_folder)
         # 读取kcco_weapons.xml里的条目
         for node in faction_weapon_xml.iter(tag="weapon"):
             weapon_file = node.attrib["file"]
@@ -404,9 +414,6 @@ def parse_faction_weapon(faction_weapon_file: str,
             if pass_this:
                 continue
             weapon_folder = faction_folder + f'/武器'
-            if REMOVE_OLD and os.path.exists(weapon_folder):
-                shutil.rmtree(weapon_folder)
-                REMOVE_OLD = False
             os.makedirs(weapon_folder, exist_ok=True)
 
             weapon_attrs["武器编号"] = ""
@@ -415,9 +422,10 @@ def parse_faction_weapon(faction_weapon_file: str,
         if not in_rec:
             logger.info(f"{faction}一共处理了{len(all_weapon.keys())}把武器")
             faction_all_weapon[f"{faction}武器"] = all_weapon
-            REMOVE_OLD = True
     elif faction == 'Paradeus':
         faction_folder = output + '/Paradeus武器'
+        if REMOVE_OLD and os.path.exists(faction_folder):
+            shutil.rmtree(faction_folder)
         # 读取paradeus_weapons.xml里的条目
         for node in faction_weapon_xml.iter(tag="weapon"):
             weapon_file = node.attrib["file"]
@@ -433,9 +441,6 @@ def parse_faction_weapon(faction_weapon_file: str,
                 if pass_this:
                     continue
                 weapon_folder = faction_folder + f'/武器'
-                if REMOVE_OLD and os.path.exists(weapon_folder):
-                    shutil.rmtree(weapon_folder)
-                    REMOVE_OLD = False
                 os.makedirs(weapon_folder, exist_ok=True)
 
                 weapon_attrs["武器编号"] = ""
@@ -444,7 +449,6 @@ def parse_faction_weapon(faction_weapon_file: str,
         if not in_rec:
             logger.info(f"{faction}一共处理了{len(all_weapon.keys())}把武器")
             faction_all_weapon[f"{faction}武器"] = all_weapon
-            REMOVE_OLD = True
 
 
 def parse_all_weapon(mod_wp_dir: str,
@@ -529,8 +533,15 @@ def write_weapon_txt(state_dict: dict):
 
         f = open(output_file, 'w', encoding='utf-8')
         # 名字里不能带 # < > [ ] | { }，并且不要在标题处使用“特殊："
-        text = text.replace("-[", "(").replace("]", ")").replace(" [", "(").replace("_", " ")
-        name = name.replace("-[", "(").replace("]", ")").replace(" [", "(").replace("_", " ")
+        paires = [
+            ["-[", "("],
+            [" [", "("],
+            ["]", ")"],
+            ["_", " "]
+        ]
+        for p in paires:
+            text = text.replace(p[0], p[1])
+            name = name.replace(p[0], p[1])
         txt = f"中文名：{text}\n英文名：{name}\n"
         txt += "{{武器模板ForThwh\n"
         for k in WEAPON_PARAMS:
@@ -594,5 +605,3 @@ def write_weapon_txt(state_dict: dict):
                 # diff = "".join([i for i in next_ptr if i not in ptr])
 
             write_batch(batch)
-
-
