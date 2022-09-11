@@ -325,7 +325,7 @@ def parse_faction_weapon(faction_weapon_file: str,
             weap_pattern = "gkw_[0-9]+_((ar)|(smg)|(hg)|(rf)|(sg)|(mg))_[0-9a-zA-Z.-]+_[0-9a-zA-Z.]+(_[0-9a-zA-Z]+)?((_MOD3)|(_mod3))?(_skill)?(_only)?.weapon"
             # 前面两种_skill，以前的老命名文件了
             # 前面两种_皮肤编号_SKIN，以前的老命名文件了
-            skin_pattern = "gkw_[0-9]+_((ar)|(smg)|(hg)|(rf)|(sg)|(mg))_[0-9a-zA-Z.-]+_[0-9a-zA-Z.]+(_[0-9a-zA-Z]+)?((_MOD3)|(_mod3))?(_[0-9a-zA-Z]+_SKIN)?(_skill)?(_only)?.weapon"
+            skin_pattern = "gkw_[0-9]+_((ar)|(smg)|(hg)|(rf)|(sg)|(mg))_[0-9a-zA-Z.-]+_[0-9a-zA-Z.]+(_[0-9a-zA-Z]+)?((_MOD3)|(_mod3))?_[0-9a-zA-Z]+_SKIN(_skill)?(_only)?.weapon"
             # 一些不同命名格式的文件
             diff_pattern = "((gkw_special_cyclops)|(target)|(gkw_medical_agl_hg)).weapon"
             # HVY武器
@@ -348,6 +348,13 @@ def parse_faction_weapon(faction_weapon_file: str,
 
                 weapon_attrs["武器编号"] = ""
                 weapon_attrs["武器类型"] = "HVY"
+                parse_weapon_file(weapon_file, weapon_folder)
+            elif re.match(diff_pattern, weapon_file) is not None:
+                weapon_folder = faction_folder + f'/特殊'
+                os.makedirs(weapon_folder, exist_ok=True)
+
+                weapon_attrs["武器编号"] = ""
+                weapon_attrs["武器类型"] = "特殊武器"
                 parse_weapon_file(weapon_file, weapon_folder)
             elif re.match(skin_pattern, weapon_file) is not None:
                 s = weapon_file.split('_')
@@ -536,6 +543,7 @@ def write_weapon_txt(state_dict: dict):
         paires = [
             ["-[", "("],
             [" [", "("],
+            ["[", "("],
             ["]", ")"],
             ["_", " "]
         ]

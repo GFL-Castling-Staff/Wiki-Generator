@@ -187,7 +187,6 @@ def parse_faction_ci(faction_ci_file:str,
             parse_ci_file(ci_file, ci_folder)
         logger.info(f"{faction}一共处理了{len(all_ci.keys())}个护甲")
         faction_all_ci[f"{faction}护甲"] = all_ci
-        # 要重新生成下一个阵营的文件夹
 
 def parse_all_carryitem(mod_i_dir:str, all_carryitem_path:str, mod_text_path:str):
 
@@ -233,8 +232,16 @@ def write_weapon_txt(state_dict: dict):
 
         f = open(output_file, 'w', encoding='utf-8')
         # 名字里不能带 # < > [ ] | { }，并且不要在标题处使用“特殊："
-        text = text.replace("-[", "(").replace("]", ")").replace(" [", "(").replace("[", "(").replace("_", " ")
-        name = name.replace("-[", "(").replace("]", ")").replace(" [", "(").replace("[", "(").replace("_", " ")
+        paires = [
+            ["-[", "("],
+            [" [", "("],
+            ["[", "("],
+            ["]", ")"],
+            ["_", " "]
+        ]
+        for p in paires:
+            text = text.replace(p[0], p[1])
+            name = name.replace(p[0], p[1])
         txt = f"中文名：{text}\n英文名：{name}\n"
         txt += "{{护甲模板ForThwh\n"
         for k in CARRY_PARAMS:
