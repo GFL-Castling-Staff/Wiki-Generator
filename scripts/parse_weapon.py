@@ -21,6 +21,10 @@ WEAPON_PARAMS = [
     "是否消音",
     "自动化程度",
     "单次击发间隔",
+    "单次击发弹丸抛射量",
+    "单次射击连续击发次数",
+    "连续击发每两次击发间隔",
+    "弹速",
     "视距",
     "移动速度修改量",
     "被发现率修改量",
@@ -31,12 +35,9 @@ WEAPON_PARAMS = [
     "初始精准度",
     "后坐力增长率",
     "后坐力回复率",
-    "单次击发弹丸抛射量",
-    "单次射击连续击发次数",
-    "连续击发每两次击发间隔",
     "所属",
-    "武器类型",
     "图片名称",
+    "页面分类",
 ]
 
 
@@ -135,6 +136,9 @@ def read_specification(weapon_attrs: dict, spec: et.Element):
     # 12
     suppressed = get_hasAttribute(spec, 'suppressed', '0')
     weapon_attrs["是否消音"] = '是' if suppressed == '1' else '否'
+
+    # 13
+    weapon_attrs["弹速"] = get_hasAttribute(spec, 'projectile_speed')
 
     return spec.attrib['name']
 
@@ -340,21 +344,21 @@ def parse_faction_weapon(faction_weapon_file: str,
                 os.makedirs(weapon_folder, exist_ok=True)
 
                 weapon_attrs["武器编号"] = ""
-                weapon_attrs["武器类型"] = "FF"
+                weapon_attrs["页面分类"] = "FF"
                 parse_weapon_file(weapon_file, weapon_folder)
             elif re.match(hvy_pattern, weapon_file) is not None:
                 weapon_folder = faction_folder + f'/HVY'
                 os.makedirs(weapon_folder, exist_ok=True)
 
                 weapon_attrs["武器编号"] = ""
-                weapon_attrs["武器类型"] = "HVY"
+                weapon_attrs["页面分类"] = "HVY"
                 parse_weapon_file(weapon_file, weapon_folder)
             elif re.match(diff_pattern, weapon_file) is not None:
                 weapon_folder = faction_folder + f'/特殊'
                 os.makedirs(weapon_folder, exist_ok=True)
 
                 weapon_attrs["武器编号"] = ""
-                weapon_attrs["武器类型"] = "特殊武器"
+                weapon_attrs["页面分类"] = "特殊武器"
                 parse_weapon_file(weapon_file, weapon_folder)
             elif re.match(skin_pattern, weapon_file) is not None:
                 s = weapon_file.split('_')
@@ -367,7 +371,7 @@ def parse_faction_weapon(faction_weapon_file: str,
                 os.makedirs(weapon_folder, exist_ok=True)
 
                 weapon_attrs["武器编号"] = weapon_id
-                weapon_attrs["武器类型"] = f'{weapon_type}皮肤'
+                weapon_attrs["页面分类"] = f'{weapon_type}皮肤'
                 parse_weapon_file(weapon_file, weapon_folder)
             elif re.match(weap_pattern, weapon_file) is not None:
                 s = weapon_file.split('_')
@@ -380,7 +384,7 @@ def parse_faction_weapon(faction_weapon_file: str,
                 os.makedirs(weapon_folder, exist_ok=True)
 
                 weapon_attrs["武器编号"] = weapon_id
-                weapon_attrs["武器类型"] = weapon_type
+                weapon_attrs["页面分类"] = weapon_type
                 parse_weapon_file(weapon_file, weapon_folder)
             else:
                 logger.info(f"跳过{weapon_file}的处理")
@@ -399,7 +403,7 @@ def parse_faction_weapon(faction_weapon_file: str,
             os.makedirs(weapon_folder, exist_ok=True)
 
             weapon_attrs["武器编号"] = ""
-            weapon_attrs["武器类型"] = "SF武器"
+            weapon_attrs["页面分类"] = "SF武器"
             parse_weapon_file(weapon_file, weapon_folder)
         if not in_rec:
             logger.info(f"{faction}一共处理了{len(all_weapon.keys())}把武器")
@@ -424,7 +428,7 @@ def parse_faction_weapon(faction_weapon_file: str,
             os.makedirs(weapon_folder, exist_ok=True)
 
             weapon_attrs["武器编号"] = ""
-            weapon_attrs["武器类型"] = "KCCO武器"
+            weapon_attrs["页面分类"] = "KCCO武器"
             parse_weapon_file(weapon_file, weapon_folder)
         if not in_rec:
             logger.info(f"{faction}一共处理了{len(all_weapon.keys())}把武器")
@@ -451,7 +455,7 @@ def parse_faction_weapon(faction_weapon_file: str,
                 os.makedirs(weapon_folder, exist_ok=True)
 
                 weapon_attrs["武器编号"] = ""
-                weapon_attrs["武器类型"] = "Paradeus武器"
+                weapon_attrs["页面分类"] = "Paradeus武器"
                 parse_weapon_file(weapon_file, weapon_folder)
         if not in_rec:
             logger.info(f"{faction}一共处理了{len(all_weapon.keys())}把武器")
@@ -540,13 +544,7 @@ def write_weapon_txt(state_dict: dict):
 
         f = open(output_file, 'w', encoding='utf-8')
         # 名字里不能带 # < > [ ] | { }，并且不要在标题处使用“特殊："
-        paires = [
-            ["-[", "("],
-            [" [", "("],
-            ["[", "("],
-            ["]", ")"],
-            ["_", " "]
-        ]
+        paires = [["-[", "("], [" [", "("], ["[", "("], ["]", ")"], ["_", " "]]
         for p in paires:
             text = text.replace(p[0], p[1])
             name = name.replace(p[0], p[1])
