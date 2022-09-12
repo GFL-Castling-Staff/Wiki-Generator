@@ -70,7 +70,7 @@ def make_excel(output: str = 'output/faction'):
     for f, d in workbook_dict.items():
         df = pd.DataFrame(d["list"], columns=d["columns"])
         df.index = df.index + 1
-        df.to_excel(writer, f)
+        df.to_excel(writer, f, index=False)
 
         worksheet = writer.sheets[f]
         cell_format = workbook.add_format({
@@ -83,7 +83,7 @@ def make_excel(output: str = 'output/faction'):
                 width = d["max_len"]
             else:
                 width = len(c) * 2
-            worksheet.set_column(i + 1, i + 1, width, cell_format=cell_format)
+            worksheet.set_column(i, i, width, cell_format=cell_format)
 
     writer.save()
     logger.info("表格生成完毕")
