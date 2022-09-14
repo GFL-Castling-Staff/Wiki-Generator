@@ -70,8 +70,8 @@ def read_ci(ci:et.Element, out_folder:str):
             except:
                 continue
 
-    global all_ci
-    all_ci[key] = {
+    global keys_ciinfos
+    keys_ciinfos[key] = {
         "ci_attrs": ci_attrs.copy(),
         "output_file": output_file,
         "text": text,
@@ -135,7 +135,7 @@ def parse_faction_ci(faction_ci_file:str,
         return
 
     logger.info(f"正在解析{faction}的护甲文件{faction_ci_file}")
-    global all_ci, ci_attrs, faction_all_ci, REMOVE_OLD
+    global keys_ciinfos, ci_attrs, factions_cis, REMOVE_OLD
     ci_attrs["所属"] = faction
     ci_attrs["页面分类"] = f'{faction}护甲'
 
@@ -143,7 +143,7 @@ def parse_faction_ci(faction_ci_file:str,
     fac_ci_xml = et.parse(fac_ci_path)
     # 以防以后各个阵营的护甲有不同之处，每个阵营用一个if语句来分离
     if faction == 'G&K':
-        faction_folder = output + '/G&K护甲'
+        faction_folder = output + f'{faction}护甲'
         if REMOVE_OLD and os.path.exists(faction_folder):
             shutil.rmtree(faction_folder)
 
@@ -152,10 +152,10 @@ def parse_faction_ci(faction_ci_file:str,
             ci_folder = faction_folder + '/护甲'
             os.makedirs(ci_folder, exist_ok=True)
             parse_ci_file(ci_file, ci_folder)
-        logger.info(f"{faction}一共处理了{len(all_ci.keys())}个护甲")
-        faction_all_ci[f"{faction}护甲"] = all_ci
+        logger.info(f"{faction}一共处理了{len(keys_ciinfos.keys())}个护甲")
+        factions_cis[f"{faction}护甲"] = keys_ciinfos
     elif faction == 'SF':
-        faction_folder = output + '/SF护甲'
+        faction_folder = output + f'{faction}护甲'
         if REMOVE_OLD and os.path.exists(faction_folder):
             shutil.rmtree(faction_folder)
         for item in fac_ci_xml.iter(tag="carry_item"):
@@ -163,10 +163,10 @@ def parse_faction_ci(faction_ci_file:str,
             ci_folder = faction_folder + '/护甲'
             os.makedirs(ci_folder, exist_ok=True)
             parse_ci_file(ci_file, ci_folder)
-        logger.info(f"{faction}一共处理了{len(all_ci.keys())}个护甲")
-        faction_all_ci[f"{faction}护甲"] = all_ci
+        logger.info(f"{faction}一共处理了{len(keys_ciinfos.keys())}个护甲")
+        factions_cis[f"{faction}护甲"] = keys_ciinfos
     elif faction == 'KCCO':
-        faction_folder = output + '/KCCO护甲'
+        faction_folder = output + f'{faction}护甲'
         if REMOVE_OLD and os.path.exists(faction_folder):
             shutil.rmtree(faction_folder)
         for item in fac_ci_xml.iter(tag="carry_item"):
@@ -174,10 +174,10 @@ def parse_faction_ci(faction_ci_file:str,
             ci_folder = faction_folder + '/护甲'
             os.makedirs(ci_folder, exist_ok=True)
             parse_ci_file(ci_file, ci_folder)
-        logger.info(f"{faction}一共处理了{len(all_ci.keys())}个护甲")
-        faction_all_ci[f"{faction}护甲"] = all_ci
+        logger.info(f"{faction}一共处理了{len(keys_ciinfos.keys())}个护甲")
+        factions_cis[f"{faction}护甲"] = keys_ciinfos
     elif faction == 'Paradeus':
-        faction_folder = output + '/Paradeus护甲'
+        faction_folder = output + f'{faction}护甲'
         if REMOVE_OLD and os.path.exists(faction_folder):
             shutil.rmtree(faction_folder)
         for item in fac_ci_xml.iter(tag="carry_item"):
@@ -185,8 +185,8 @@ def parse_faction_ci(faction_ci_file:str,
             ci_folder = faction_folder + '/护甲'
             os.makedirs(ci_folder, exist_ok=True)
             parse_ci_file(ci_file, ci_folder)
-        logger.info(f"{faction}一共处理了{len(all_ci.keys())}个护甲")
-        faction_all_ci[f"{faction}护甲"] = all_ci
+        logger.info(f"{faction}一共处理了{len(keys_ciinfos.keys())}个护甲")
+        factions_cis[f"{faction}护甲"] = keys_ciinfos
 
 def parse_all_carryitem(mod_i_dir:str, all_carryitem_path:str, mod_text_path:str):
 
@@ -198,21 +198,21 @@ def parse_all_carryitem(mod_i_dir:str, all_carryitem_path:str, mod_text_path:str
 
     all_ci_xml = et.parse(all_carryitem_path)
 
-    global ci_attrs, cnt, all_ci, faction_all_ci, REMOVE_OLD
+    global ci_attrs, cnt, keys_ciinfos, factions_cis, REMOVE_OLD
     REMOVE_OLD = gval._global_dict["REMOVE_OLD"]
-    faction_all_ci = {}
+    factions_cis = {}
 
     for item in all_ci_xml.iter(tag="carry_item"):
         xml_file = item.attrib["file"]
         if xml_file.endswith('.xml'):
-            all_ci = {}
+            keys_ciinfos = {}
             ci_attrs = {}
             parse_faction_ci(xml_file)
     cnt = 0
-    for k, v in faction_all_ci.items():
+    for k, v in factions_cis.items():
         write_weapon_txt(v)
 
-    return faction_all_ci, CARRY_PARAMS
+    return factions_cis, CARRY_PARAMS
 
 
 def write_weapon_txt(state_dict: dict):
@@ -280,7 +280,7 @@ def make_excel(output: str = 'output/carryitem'):
             faction_dict[faction_name] = {"list": []}
             max_len = 0
             for k in enum_wtype(item.path):
-                ci_attrs = faction_all_ci[faction_name][k]
+                ci_attrs = factions_cis[faction_name][k]
                 ci_attr = ci_attrs['ci_attrs']
                 ci_attr.pop('所属')
                 ci_attr.pop('图片名称')

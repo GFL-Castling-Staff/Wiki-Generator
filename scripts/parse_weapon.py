@@ -10,6 +10,9 @@ from loguru import logger
 使用Thwh版武器模板的wiki生成器
 '''
 
+mod_weapon_dir = r"E:\SteamLibrary\steamapps\workshop\content\270150\2606099273\media\packages\GFL_Castling\weapons"
+all_weapon_path = mod_weapon_dir + r"\all_weapons.xml"
+
 WEAPON_PARAMS = [
     "页面分类",
     "弹头类型",
@@ -197,7 +200,7 @@ def read_projectile(weapon_attrs: dict, proj: et.Element):
 
 
 def read_weapon(weapon: et.Element, out_folder: str):
-    global weapon_attrs, name2text, all_weapon
+    global weapon_attrs, name2text, keys_weaponinfos
 
     # 过滤key值
     key = weapon.attrib['key']
@@ -264,7 +267,7 @@ def read_weapon(weapon: et.Element, out_folder: str):
             except:
                 continue
 
-    all_weapon[key] = {
+    keys_weaponinfos[key] = {
         "weapon_attrs": weapon_attrs.copy(),
         "output_file": output_file,
         "next_key": next_key,
@@ -306,7 +309,7 @@ def parse_faction_weapon(faction_weapon_file: str,
 
     logger.info(f"正在解析{faction}的武器文件{faction_weapon_file}")
 
-    global weapon_attrs, all_weapon, REMOVE_OLD
+    global weapon_attrs, keys_weaponinfos, REMOVE_OLD
 
     weapon_attrs["所属"] = faction
 
@@ -390,8 +393,8 @@ def parse_faction_weapon(faction_weapon_file: str,
                 logger.info(f"跳过{weapon_file}的处理")
                 continue
         if not in_rec:
-            logger.info(f"{faction}一共处理了{len(all_weapon.keys())}把武器")
-            faction_all_weapon[f"{faction}武器"] = all_weapon
+            logger.info(f"{faction}一共处理了{len(keys_weaponinfos.keys())}把武器")
+            factions_weapons[f"{faction}武器"] = keys_weaponinfos
     elif faction == 'SF':
         faction_folder = output + '/SF武器'
         if REMOVE_OLD and os.path.exists(faction_folder):
@@ -406,8 +409,8 @@ def parse_faction_weapon(faction_weapon_file: str,
             weapon_attrs["页面分类"] = "SF武器"
             parse_weapon_file(weapon_file, weapon_folder)
         if not in_rec:
-            logger.info(f"{faction}一共处理了{len(all_weapon.keys())}把武器")
-            faction_all_weapon[f"{faction}武器"] = all_weapon
+            logger.info(f"{faction}一共处理了{len(keys_weaponinfos.keys())}把武器")
+            factions_weapons[f"{faction}武器"] = keys_weaponinfos
     elif faction == 'KCCO':
         faction_folder = output + '/KCCO武器'
         if REMOVE_OLD and os.path.exists(faction_folder):
@@ -431,8 +434,8 @@ def parse_faction_weapon(faction_weapon_file: str,
             weapon_attrs["页面分类"] = "KCCO武器"
             parse_weapon_file(weapon_file, weapon_folder)
         if not in_rec:
-            logger.info(f"{faction}一共处理了{len(all_weapon.keys())}把武器")
-            faction_all_weapon[f"{faction}武器"] = all_weapon
+            logger.info(f"{faction}一共处理了{len(keys_weaponinfos.keys())}把武器")
+            factions_weapons[f"{faction}武器"] = keys_weaponinfos
     elif faction == 'Paradeus':
         faction_folder = output + '/Paradeus武器'
         if REMOVE_OLD and os.path.exists(faction_folder):
@@ -458,8 +461,8 @@ def parse_faction_weapon(faction_weapon_file: str,
                 weapon_attrs["页面分类"] = "Paradeus武器"
                 parse_weapon_file(weapon_file, weapon_folder)
         if not in_rec:
-            logger.info(f"{faction}一共处理了{len(all_weapon.keys())}把武器")
-            faction_all_weapon[f"{faction}武器"] = all_weapon
+            logger.info(f"{faction}一共处理了{len(keys_weaponinfos.keys())}把武器")
+            factions_weapons[f"{faction}武器"] = keys_weaponinfos
 
 
 def parse_all_weapon(mod_wp_dir: str,
@@ -476,17 +479,18 @@ def parse_all_weapon(mod_wp_dir: str,
 
     all_weapon_xml = et.parse(all_weapon_path)
 
-    global weapon_attrs, all_weapon, faction_all_weapon, REMOVE_OLD, cnt
+    global weapon_attrs, keys_weaponinfos, factions_weapons, REMOVE_OLD, cnt
     REMOVE_OLD = gval._global_dict["REMOVE_OLD"]
-    faction_all_weapon = {}
+    factions_weapons = {}
     for node in all_weapon_xml.iter(tag="weapon"):
         weapon_attrs = {}
-        all_weapon = {}
+        keys_weaponinfos = {}
         parse_faction_weapon(node.attrib["file"])
     cnt = 0
-    for k, v in faction_all_weapon.items():
+    for k, v in factions_weapons.items():
         write_weapon_txt(v)
-    return faction_all_weapon, WEAPON_PARAMS
+    return factions_weapons, WEAPON_PARAMS
+
 
 
 async def parse_merged_weapon(merged_weapon_path: str,
