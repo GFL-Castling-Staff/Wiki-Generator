@@ -153,7 +153,7 @@ if __name__ == "__main__":
     mod_vehicles_dir = r"E:\SteamLibrary\steamapps\workshop\content\270150\2606099273\media\packages\GFL_Castling\vehicles"
     Castling_vehicles_path = mod_vehicles_dir + '/GFL_Castling_vehicles.xml'
 
-    generate_weapon(True, True)
-    generate_carryitem(True, True)
+    generate_weapon(False, False)
+    generate_carryitem(False, False)
     generate_vehicle(True, True)
     make_excel()

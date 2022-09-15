@@ -179,7 +179,7 @@ def _parse_vehicle_file(vehicle_file: str, out_folder: str):
 
 def parse_vehicle_file(vehicle_file: str, output: str = 'output/faction'):
     # 匹配阵营
-    if vehicle_file.startswith('gk') and not vehicle_file.endswith('store.vehicle'):
+    if vehicle_file.startswith(('gk', 'GK')) and not vehicle_file.endswith('store.vehicle'):
         faction = 'G&K'
     elif vehicle_file.startswith(('sf')):
         faction = 'SF'

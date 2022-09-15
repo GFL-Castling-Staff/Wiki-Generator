@@ -33,7 +33,9 @@ WEAPON_PARAMS = [
     "连续击发每两次击发间隔",
     "视距",
     "衰减开始时间",
+    "衰减开始距离",
     "衰减结束时间",
+    "衰减结束距离",
     "散步范围",
     "初始精准度",
     "后坐力增长率",
@@ -175,9 +177,27 @@ def read_result(weapon_attrs: dict, result: et.Element):
     weapon_attrs["绝对追伤"] = get_hasAttribute(
         result, 'kill_probability_offset_on_successful_hit')
 
-    weapon_attrs["衰减开始时间"] = get_hasAttribute(result, 'kill_decay_start_time')
+    stime = get_hasAttribute(result, 'kill_decay_start_time')
+    weapon_attrs["衰减开始时间"] = stime
 
-    weapon_attrs["衰减结束时间"] = get_hasAttribute(result, 'kill_decay_end_time')
+    etime= get_hasAttribute(result, 'kill_decay_end_time')
+    weapon_attrs["衰减结束时间"] = etime
+
+    if weapon_attrs["弹速"] == '':
+        sdistance = ''
+        edistance = ''
+    else:
+        if stime != '':
+            sdistance = float(stime) * float(weapon_attrs["弹速"])
+        else:
+            sdistance = ''
+        if etime != '':
+            edistance = float(etime) * float(weapon_attrs["弹速"])
+        else:
+            edistance = ''
+
+    weapon_attrs["衰减开始距离"] = sdistance
+    weapon_attrs["衰减结束距离"] = edistance
 
 
 def read_projectile(weapon_attrs: dict, proj: et.Element):
@@ -390,7 +410,7 @@ def parse_faction_weapon(faction_weapon_file: str,
                 weapon_attrs["页面分类"] = weapon_type
                 parse_weapon_file(weapon_file, weapon_folder)
             else:
-                logger.info(f"跳过{weapon_file}的处理")
+                logger.warning(f"跳过{weapon_file}的处理")
                 continue
         if not in_rec:
             logger.info(f"{faction}一共处理了{len(keys_weaponinfos.keys())}把武器")
@@ -426,6 +446,7 @@ def parse_faction_weapon(faction_weapon_file: str,
                     pass_this = True
                     break
             if pass_this:
+                logger.warning(f"跳过{weapon_file}的处理")
                 continue
             weapon_folder = faction_folder + f'/武器'
             os.makedirs(weapon_folder, exist_ok=True)
@@ -453,6 +474,7 @@ def parse_faction_weapon(faction_weapon_file: str,
                         pass_this = True
                         break
                 if pass_this:
+                    logger.warning(f"跳过{weapon_file}的处理")
                     continue
                 weapon_folder = faction_folder + f'/武器'
                 os.makedirs(weapon_folder, exist_ok=True)
