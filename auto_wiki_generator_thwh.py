@@ -70,6 +70,7 @@ def make_excel(output: str = 'output/faction'):
                     vehicle_attr = vehicle_attrs['vehicle_attrs']
                     vehicle_attr.pop('所属')
                     vehicle_attr["载具名称"] = vehicle_attrs["text"]
+                    vehicle_attr["炮塔描述"] = vehicle_attr["炮塔描述"].replace("<br>", "\n")
                     name_max_len = len(vehicle_attrs["text"]) if len(
                         vehicle_attrs["text"]) > name_max_len else name_max_len
                     workbook_dict[sheet_name]["list"].append(vehicle_attr)
@@ -136,6 +137,11 @@ def generate_vehicle(REMOVE_OLD, DO_WRITE_TXT=True):
                                                        mod_text_path)
 
 
+def gen_template():
+    from scripts import gen_part_template, VEHICLE_PARAMS, VEHICLE_CAN_EMPTY
+    with open("output/gen_template.txt", "w") as f:
+        f.write(gen_part_template(VEHICLE_PARAMS, VEHICLE_CAN_EMPTY))
+
 if __name__ == "__main__":
     logger.add("output/wiki_generator_log.txt",
                encoding="utf-8",
@@ -153,7 +159,13 @@ if __name__ == "__main__":
     mod_vehicles_dir = r"E:\SteamLibrary\steamapps\workshop\content\270150\2606099273\media\packages\GFL_Castling\vehicles"
     Castling_vehicles_path = mod_vehicles_dir + '/GFL_Castling_vehicles.xml'
 
-    generate_weapon(False, False)
-    generate_carryitem(False, False)
-    generate_vehicle(True, True)
+    # gen_template()
+    # exit(0)
+
+    a1 = True
+    generate_weapon(a1, a1)
+    a2 = True
+    generate_carryitem(a2, a2)
+    a3 = True
+    generate_vehicle(a3, a3)
     make_excel()

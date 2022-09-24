@@ -46,6 +46,23 @@ WEAPON_PARAMS = [
 ]
 
 
+def gen_part_template(params: list, can_empty: list):
+    ret = ""
+    for p in params:
+        if p in can_empty:
+            ret += '''|-
+{{#if:{{{'''+p+'''|}}}|
+{{!}} '''+p+'''
+{{!}}colspan=2{{!}}{{{'''+p+'''}}}
+}}
+'''
+        else:
+            ret +=  '''|-
+| '''+p+'''
+|colspan=2|{{{'''+p+'}}}\n'
+    return ret
+
+
 def check_keys(weapon_attrs: dict):
     keys = WEAPON_PARAMS[:]
     for k in weapon_attrs.keys():
@@ -180,7 +197,7 @@ def read_result(weapon_attrs: dict, result: et.Element):
     stime = get_hasAttribute(result, 'kill_decay_start_time')
     weapon_attrs["衰减开始时间"] = stime
 
-    etime= get_hasAttribute(result, 'kill_decay_end_time')
+    etime = get_hasAttribute(result, 'kill_decay_end_time')
     weapon_attrs["衰减结束时间"] = etime
 
     if weapon_attrs["弹速"] == '':
@@ -512,7 +529,6 @@ def parse_all_weapon(mod_wp_dir: str,
     for k, v in factions_weapons.items():
         write_weapon_txt(v)
     return factions_weapons, WEAPON_PARAMS
-
 
 
 async def parse_merged_weapon(merged_weapon_path: str,

@@ -143,7 +143,7 @@ def parse_faction_ci(faction_ci_file:str,
     fac_ci_xml = et.parse(fac_ci_path)
     # 以防以后各个阵营的护甲有不同之处，每个阵营用一个if语句来分离
     if faction == 'G&K':
-        faction_folder = output + f'{faction}护甲'
+        faction_folder = output + f'/{faction}护甲'
         if REMOVE_OLD and os.path.exists(faction_folder):
             shutil.rmtree(faction_folder)
 
@@ -155,7 +155,7 @@ def parse_faction_ci(faction_ci_file:str,
         logger.info(f"{faction}一共处理了{len(keys_ciinfos.keys())}个护甲")
         factions_cis[f"{faction}护甲"] = keys_ciinfos
     elif faction == 'SF':
-        faction_folder = output + f'{faction}护甲'
+        faction_folder = output + f'/{faction}护甲'
         if REMOVE_OLD and os.path.exists(faction_folder):
             shutil.rmtree(faction_folder)
         for item in fac_ci_xml.iter(tag="carry_item"):
@@ -166,7 +166,7 @@ def parse_faction_ci(faction_ci_file:str,
         logger.info(f"{faction}一共处理了{len(keys_ciinfos.keys())}个护甲")
         factions_cis[f"{faction}护甲"] = keys_ciinfos
     elif faction == 'KCCO':
-        faction_folder = output + f'{faction}护甲'
+        faction_folder = output + f'/{faction}护甲'
         if REMOVE_OLD and os.path.exists(faction_folder):
             shutil.rmtree(faction_folder)
         for item in fac_ci_xml.iter(tag="carry_item"):
@@ -177,7 +177,7 @@ def parse_faction_ci(faction_ci_file:str,
         logger.info(f"{faction}一共处理了{len(keys_ciinfos.keys())}个护甲")
         factions_cis[f"{faction}护甲"] = keys_ciinfos
     elif faction == 'Paradeus':
-        faction_folder = output + f'{faction}护甲'
+        faction_folder = output + f'/{faction}护甲'
         if REMOVE_OLD and os.path.exists(faction_folder):
             shutil.rmtree(faction_folder)
         for item in fac_ci_xml.iter(tag="carry_item"):

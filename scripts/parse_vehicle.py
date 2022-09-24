@@ -7,6 +7,15 @@ from loguru import logger
 from .parse_weapon import get_hasAttribute, parse_text, read_projectile, read_specification
 from . import global_var as gval
 
+VEHICLE_CAN_EMPTY = [
+    "推动阈值",
+    "爆炸伤害阈值",
+    "能否水上行驶",
+    "瘫痪时生命值",
+    "撞人所需时速",
+    "重生时间",
+    
+]
 VEHICLE_PARAMS = [
     "生命值",
     "质量",
@@ -59,12 +68,20 @@ def query_merged_weapon(merged_weapon_path: str, keys:list):
         read_projectile(weapon_attrs, projectile)
         proj_cls = weapon_attrs["弹头类型"]
         if proj_cls == '动能':
-            ret += ", {}致死".format(weapon_attrs["致死/伤害"])
-            if weapon_attrs["绝对追伤"] != '':
-                ret += "{}追伤".format(weapon_attrs["绝对追伤"])
-            ret += "hit伤害"
+            damage = weapon_attrs["致死/伤害"]
+            if damage != '':
+                ret += ", {}致死".format(damage)
+                if weapon_attrs["绝对追伤"] != '':
+                    ret += "{}追伤".format(weapon_attrs["绝对追伤"])
+                ret += "hit伤害"
+            else:
+                ret += "无伤害信息"
         elif proj_cls == '爆炸':
-            ret += ", {}blast伤害".format(weapon_attrs["致死/伤害"])
+            damage = weapon_attrs["致死/伤害"]
+            if damage != '':
+                ret += ", {}blast伤害".format(damage)
+            else:
+                ret += "无伤害信息"
         else:
             ret += "无伤害信息"
         return ret.strip("\n")
@@ -125,7 +142,7 @@ def read_vehicle(vehicle: et.Element, out_folder: str):
     turret_attrs = {}
     for turret in vehicle.findall("turret"):
         read_turret(turret_attrs, turret)
-    vehicle_attrs["炮塔描述"] = '\n'.join(turret_attrs.values())
+    vehicle_attrs["炮塔描述"] = '<br>'.join(turret_attrs.values())
     
     # 读取modifier
     modifier = vehicle.findall('modifier')
@@ -185,7 +202,7 @@ def parse_vehicle_file(vehicle_file: str, output: str = 'output/faction'):
         faction = 'SF'
     elif vehicle_file.startswith('kcco'):
         faction = 'KCCO'
-    elif vehicle_file.startswith('par'):
+    elif vehicle_file.startswith('par') and not 'ruin' in vehicle_file:
         faction = 'Paradeus'
     else:
         logger.warning(f"未知阵营文件{vehicle_file}将跳过")
