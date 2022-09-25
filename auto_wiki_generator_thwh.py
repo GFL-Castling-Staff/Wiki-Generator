@@ -3,7 +3,7 @@ from scripts import parse_all_weapon, parse_all_carryitem, parse_Castling_vehicl
 from scripts import global_var as gval
 
 from loguru import logger
-from time import perf_counter
+from time import perf_counter, sleep
 
 import pandas as pd
 
@@ -24,7 +24,14 @@ def make_excel(output: str = 'output/faction'):
         return keys
 
     xlsx_path = output + '/武器护甲载具数据汇总.xlsx'
-    writer = pd.ExcelWriter(xlsx_path)
+    opened = False
+    while not opened:
+        try:
+            writer = pd.ExcelWriter(xlsx_path)
+            opened = True
+        except Exception as e:
+            logger.error(e)
+            sleep(2)
     workbook = writer.book
 
     workbook_dict = {}
@@ -100,6 +107,7 @@ def make_excel(output: str = 'output/faction'):
             else:
                 width = len(c) * 2
             worksheet.set_column(i, i, width, cell_format=cell_format)
+        worksheet.autofilter(0, 0, df.shape[0], df.shape[1]-1)
 
     writer.save()
     logger.info("表格生成完毕")
