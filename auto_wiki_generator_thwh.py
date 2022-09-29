@@ -107,6 +107,7 @@ def make_excel(output: str = 'output/faction'):
             else:
                 width = len(c) * 2
             worksheet.set_column(i, i, width, cell_format=cell_format)
+        worksheet.freeze_panes(1, 0)
         worksheet.autofilter(0, 0, df.shape[0], df.shape[1]-1)
 
     writer.save()
