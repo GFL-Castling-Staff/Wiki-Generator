@@ -1,4 +1,5 @@
 import os
+import traceback
 from scripts import parse_all_weapon, parse_all_carryitem, parse_Castling_vehicles
 from scripts import global_var as gval
 
@@ -30,7 +31,7 @@ def make_excel(output: str = 'output/faction'):
             writer = pd.ExcelWriter(xlsx_path)
             opened = True
         except Exception as e:
-            logger.error(e)
+            logger.error(traceback.format_exc())
             sleep(2)
     workbook = writer.book
 
