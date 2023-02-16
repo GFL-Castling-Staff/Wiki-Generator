@@ -8,4 +8,4 @@
 
 ## 使用
 
-运行`auto_wiki_generator_thwh.py`
+修改 `auto_wiki_generator_thwh.py` 中约 270行左右 `if __name__ == "__main__":` 以后的 `mod_text_path, mod_weapon_dir, mod_items_dir, mod_vehicles_dir` 为自己电脑上的路径，之后运行即可。
