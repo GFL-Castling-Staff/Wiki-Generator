@@ -68,11 +68,15 @@ def check_keys(weapon_attrs: dict):
     for k in weapon_attrs.keys():
         keys.remove(k)
 
+    # 因为这个逼游戏，缺失一些元素也是可以运行的
+    # 所以不再抛出错误，而是全部设置为空
     if len(keys) != 0:
         err = "These keys are not defined:\n"
         for k in keys:
             err += f"{' '*4}{k}\n"
-        raise ValueError(err)
+            weapon_attrs[k] = ''
+        logger.warning(err)
+        # raise ValueError(err)
     else:
         logger.debug("All keys are defined")
 
@@ -231,9 +235,11 @@ def read_projectile(weapon_attrs: dict, proj: et.Element):
             if result != None:
                 read_result(weapon_attrs, result)
             else:
-                raise ValueError("Cant get projectile <result> tag")
+                logger.warning("Cant get projectile <result> tag")
+                # raise ValueError("Cant get projectile <result> tag")
     else:
-        raise ValueError("Projectile is none")
+        logger.warning("Projectile is none")
+        # raise ValueError("Projectile is none")
 
 
 def read_weapon(weapon: et.Element, out_folder: str):
